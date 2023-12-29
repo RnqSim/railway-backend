@@ -1,5 +1,6 @@
 package com.dcc.clinics.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.dcc.clinics.model.UnverifiedPatient;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Service
@@ -56,26 +59,28 @@ public class PatientService {
         if (u != null || unv != null) {
             return "Username is already in use.";
         } else {
-            if (uemail != null || unvemail != null) {
-                return "Email is already in use.";
-            } else {
-                BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-                String encryptedPassword = bcrypt.encode(user.getPassword());
-                user.setPassword(encryptedPassword);
-                int otp = generateVerificationCode();
-
-                sendVerification(user.getEmail(), otp);
-
-                UnverifiedUser newUser = new UnverifiedUser(user, otp);
-                UnverifiedPatient newPatient = new UnverifiedPatient(patient);
-                
-                // Save the unverified user and patient to their respective repositories
-                unverifiedUserRepository.save(newUser);
-                newPatient.setUserId(newUser.getUserId());
-                unverifiedPatientRepository.save(newPatient);
-
-                return "User registered successfully";
+            if (uemail != null) {
+                if (uemail.getDeletionStatus() != "Deleted") return "Email is already in use by a non-Deleted Account.";
             }
+            if (unvemail != null) {
+                if (unvemail.getDeletionStatus() != "Deleted") return "Email is already in use by a non-Deleted Account.";
+            }
+            BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+            String encryptedPassword = bcrypt.encode(user.getPassword());
+            user.setPassword(encryptedPassword);
+            int otp = generateVerificationCode();
+
+            sendVerification(user.getEmail(), otp);
+
+            UnverifiedUser newUser = new UnverifiedUser(user, otp);
+            UnverifiedPatient newPatient = new UnverifiedPatient(patient);
+
+            // Save the unverified user and patient to their respective repositories
+            unverifiedUserRepository.save(newUser);
+            newPatient.setUserId(newUser.getUserId());
+            unverifiedPatientRepository.save(newPatient);
+
+            return "User registered successfully";
         }
     }
 
@@ -262,5 +267,20 @@ public class PatientService {
         }
     }
 
+    public String deactivateUser(Long userId) {
+        User userToDeactivate = userRepository.findByUserId(userId);
+        UnverifiedUser unverifiedUserToDeactivate = unverifiedUserRepository.findByUserId(userId);
+        if(userToDeactivate != null && unverifiedUserToDeactivate == null) {
+            userToDeactivate.setDeletionStatus("Deleted");
+            userRepository.save(userToDeactivate);
+            return "Patient deletion status set to Deleted";
+        } else if(userToDeactivate == null && unverifiedUserToDeactivate != null) {
+            unverifiedUserToDeactivate.setDeletionStatus("Deleted");
+            unverifiedUserRepository.save(unverifiedUserToDeactivate);
+            return "Unverified Patient deletion status set to Deleted";
+        } else {
+            return "User not found";
+        }
+    }
 
 }

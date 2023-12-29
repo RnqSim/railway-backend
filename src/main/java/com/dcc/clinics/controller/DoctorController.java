@@ -28,7 +28,6 @@ public class DoctorController {
     	return ResponseEntity.ok(doctorService.addUser(user, doctor));
     }
     
-    
     @CrossOrigin(origins = "https://docclickconnect.onrender.com")
     @PostMapping("/doctorverify")
     public ResponseEntity<String> verifyUser(@RequestParam("email") String email,
@@ -164,4 +163,10 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Admin login failed: " + loginResult);
         }
     }
+
+    @DeleteMapping("/doctors")
+    public ResponseEntity<String> deleteUser(@RequestParam("userId") Long userId) {
+        return ResponseEntity.ok(doctorService.deactivateUser(userId));
+    }
+
 }

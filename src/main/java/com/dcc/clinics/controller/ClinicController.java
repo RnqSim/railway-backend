@@ -32,7 +32,7 @@ public class ClinicController {
 
     @DeleteMapping("/{clinicId}")
     public ResponseEntity<String> deleteClinic(@PathVariable("clinicId") Long clinicId) {
-        return ResponseEntity.ok(clinicService.deleteClinic(clinicId));
+        return ResponseEntity.ok(clinicService.deactivateClinic(clinicId));
     }
 
     @GetMapping("/allclinics")

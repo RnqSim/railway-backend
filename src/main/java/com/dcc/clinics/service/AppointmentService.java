@@ -261,13 +261,26 @@ public class AppointmentService {
 
     public String updateAppointmentStatus(Long appointmentId, String newStatus) {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
-        
+
         if (optionalAppointment.isPresent()) {
             Appointment appointment = optionalAppointment.get();
             String oldStatus = appointment.getStatus();
 
             appointment.setStatus(newStatus);
             Date scheduleDate = appointment.getScheduleDate();
+
+            if(newStatus == "Completed") {
+                LocalDateTime currentDateTime = LocalDateTime.now();
+
+                // Calculate the time difference between scheduleDate and currentDateTime
+                long timeDifference = scheduleDate.getTime() - Date.from(currentDateTime.atZone(ZoneId.systemDefault()).toInstant()).getTime();
+                long hoursDifference = TimeUnit.MILLISECONDS.toHours(timeDifference);
+
+                // appointment time - current time (if current time is after, result should be negative or 0)
+                if (hoursDifference > 0) {
+                    return "Cannot complete appointment before provided appointment time";
+                }
+            }
 
             try {
                 final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -298,6 +311,8 @@ public class AppointmentService {
                     oldDescription = "Status: Cancelled";
                 } else if (oldStatus.compareTo("Rescheduled")==0) {
                     oldDescription = "Rescheduled";
+                } else if (oldStatus.compareTo("Completed")==0) {
+                    oldDescription = "Completed";
                 } else {
                     oldDescription = "Unknown status";
                 }
@@ -310,6 +325,8 @@ public class AppointmentService {
                     newDescription = "Status: Cancelled";
                 } else if (newStatus.compareTo("Rescheduled")==0) {
                     newDescription = "Rescheduled";
+                } else if (newStatus.compareTo("Completed")==0) {
+                    newDescription = "Completed";
                 } else {
                     newDescription = "Unknown status";
                 }

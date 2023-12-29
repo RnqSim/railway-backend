@@ -55,6 +55,8 @@ public class UnverifiedUser {
     @Column(name = "user_type", nullable = false, length = 20)
     private String userType;
 
+	@Column(name = "deletion_status", length = 50)
+	private String deletionStatus;
 	
 	@Column(name = "otp")
 	@JsonProperty("otp")
@@ -81,9 +83,27 @@ public class UnverifiedUser {
 		this.otp = otp;
 	}
 
+	public UnverifiedUser(Long userId, String username, String firstName, String middleName, String lastName, Integer age, String sex, Date birthday, String address, String contactNumber, String email, String password, String userType, String deletionStatus, Integer otp) {
+		this.userId = userId;
+		this.username = username;
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.age = age;
+		this.sex = sex;
+		this.birthday = birthday;
+		this.address = address;
+		this.contactNumber = contactNumber;
+		this.email = email;
+		this.password = password;
+		this.userType = userType;
+		this.deletionStatus = deletionStatus;
+		this.otp = otp;
+	}
+
 	public UnverifiedUser(Long userId, String username, String firstName, String middleName, String lastName,
-			Integer age, String sex, Date birthday, String address, String contactNumber, String email, String password,
-			Integer otp, String userType) {
+						  Integer age, String sex, Date birthday, String address, String contactNumber, String email, String password,
+						  Integer otp, String userType) {
 		super();
 		this.userId = userId;
 		this.username = username;
@@ -99,6 +119,14 @@ public class UnverifiedUser {
 		this.password = password;
 		this.otp = otp;
 		this.userType = userType;
+	}
+
+	public String getDeletionStatus() {
+		return deletionStatus;
+	}
+
+	public void setDeletionStatus(String deletionStatus) {
+		this.deletionStatus = deletionStatus;
 	}
 
 	public Long getUserId() {

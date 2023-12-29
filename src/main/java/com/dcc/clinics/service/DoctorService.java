@@ -1,5 +1,6 @@
 package com.dcc.clinics.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.dcc.clinics.model.UnverifiedUser;
@@ -59,30 +60,33 @@ public class DoctorService {
         if (u != null || unv != null) {
             return "Username is already in use.";
         } else {
-            if (uemail != null || unvemail != null) {
-                return "Email is already in use.";
-            } else {
-                BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-                String encryptedPassword = bcrypt.encode(user.getPassword());
-                user.setPassword(encryptedPassword);
-                int otp = generateVerificationCode();
-
-                sendVerification(user.getEmail(), otp);
-
-                UnverifiedUser newUser = new UnverifiedUser(user, otp);
-                
-                UnverifiedDoctor newDoctor = new UnverifiedDoctor(doctor);
-                
-                newDoctor.setApprovalStatus("Subject for Approval");
-
-                // Save the unverified user and patient to their respective repositories
-                unverifiedUserRepository.save(newUser);
-                newDoctor.setUserId(newUser.getUserId());
-                unverifiedDoctorRepository.save(newDoctor);
-                
-
-                return "User registered successfully";
+            if (uemail != null) {
+                if (uemail.getDeletionStatus() != "Deleted") return "Email is already in use by a non-Deleted Account.";
             }
+            if (unvemail != null) {
+                if (unvemail.getDeletionStatus() != "Deleted") return "Email is already in use by a non-Deleted Account.";
+            }
+
+            BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+            String encryptedPassword = bcrypt.encode(user.getPassword());
+            user.setPassword(encryptedPassword);
+            int otp = generateVerificationCode();
+
+            sendVerification(user.getEmail(), otp);
+
+            UnverifiedUser newUser = new UnverifiedUser(user, otp);
+
+            UnverifiedDoctor newDoctor = new UnverifiedDoctor(doctor);
+
+            newDoctor.setApprovalStatus("Subject for Approval");
+
+            // Save the unverified user and patient to their respective repositories
+            unverifiedUserRepository.save(newUser);
+            newDoctor.setUserId(newUser.getUserId());
+            unverifiedDoctorRepository.save(newDoctor);
+
+
+            return "User registered successfully";
         }
     }
     
@@ -358,4 +362,21 @@ public class DoctorService {
             return "User not found";
         }
     }
+
+    public String deactivateUser(Long userId) {
+        User userToDeactivate = userRepository.findByUserId(userId);
+        UnverifiedUser unverifiedUserToDeactivate = unverifiedUserRepository.findByUserId(userId);
+        if(userToDeactivate != null && unverifiedUserToDeactivate == null) {
+            userToDeactivate.setDeletionStatus("Deleted");
+            userRepository.save(userToDeactivate);
+            return "Doctor deletion status set to Deleted";
+        } else if(userToDeactivate == null && unverifiedUserToDeactivate != null) {
+            unverifiedUserToDeactivate.setDeletionStatus("Deleted");
+            unverifiedUserRepository.save(unverifiedUserToDeactivate);
+            return "Unverified Doctor deletion status set to Deleted";
+        } else {
+            return "User not found";
+        }
+    }
+
 }

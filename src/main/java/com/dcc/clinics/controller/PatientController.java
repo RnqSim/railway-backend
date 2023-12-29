@@ -109,4 +109,9 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @DeleteMapping("/patients")
+    public ResponseEntity<String> deleteUser(@RequestParam("userId") Long userId) {
+        return ResponseEntity.ok(patientService.deactivateUser(userId));
+    }
 }

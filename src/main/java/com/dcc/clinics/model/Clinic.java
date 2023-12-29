@@ -29,6 +29,9 @@ public class Clinic {
 
     @Column(name = "hospital", length = 255)
     private String hospital;
+
+	@Column(name = "deletion_status", length = 50)
+	private String deletionStatus;
     
     public Clinic() {
     	
@@ -43,6 +46,25 @@ public class Clinic {
 		this.officeEmail = officeEmail;
 		this.hospital = hospital;
 	}
+
+	public Clinic(Long clinicId, String name, String address, String officeNumber, String officeEmail, String hospital, String deletionStatus) {
+		this.clinicId = clinicId;
+		this.name = name;
+		this.address = address;
+		this.officeNumber = officeNumber;
+		this.officeEmail = officeEmail;
+		this.hospital = hospital;
+		this.deletionStatus = deletionStatus;
+	}
+
+	public String getDeletionStatus() {
+		return deletionStatus;
+	}
+
+	public void setDeletionStatus(String deletionStatus) {
+		this.deletionStatus = deletionStatus;
+	}
+
 	public Long getClinicId() {
 		return clinicId;
 	}

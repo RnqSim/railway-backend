@@ -75,6 +75,12 @@ public class ClinicService {
         clinicRepository.deleteById(id);
         return "Clinic deleted";
     }
+    public String deactivateClinic(Long clinicId) {
+        Clinic clinicToDeactivate = clinicRepository.findByClinicId(clinicId);
+        clinicToDeactivate.setDeletionStatus("Deleted");
+        clinicRepository.save(clinicToDeactivate);
+        return "Clinic deletion status set to Deleted";
+    }
 
     public Clinic findClinicById(Long clinicId) {
         return clinicRepository.findById(clinicId).orElse(null);

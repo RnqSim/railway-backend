@@ -51,6 +51,9 @@ public class User {
     @Column(name = "user_type", nullable = false, length = 20)
     private String userType;
 
+	@Column(name = "deletion_status", length = 50)
+	private String deletionStatus;
+
 	public User() {
 		
 	}
@@ -71,8 +74,26 @@ public class User {
 		this.userType =  unvUser.getUserType();
 	}
 
+	public User(Long userId, String username, String firstName, String middleName, String lastName, Integer age, String sex, Date birthday, String address, String contactNumber, String email, String password, String avatar, String userType, String deletionStatus) {
+		this.userId = userId;
+		this.username = username;
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.age = age;
+		this.sex = sex;
+		this.birthday = birthday;
+		this.address = address;
+		this.contactNumber = contactNumber;
+		this.email = email;
+		this.password = password;
+		this.avatar = avatar;
+		this.userType = userType;
+		this.deletionStatus = deletionStatus;
+	}
+
 	public User(Long userId, String username, String firstName, String middleName, String lastName, int age, String sex,
-			Date birthday, String address, String contactNumber, String email, String password, String userType, String avatar) {
+				Date birthday, String address, String contactNumber, String email, String password, String userType, String avatar) {
 		super();
 		this.userId = userId;
 		this.username = username;
@@ -88,6 +109,18 @@ public class User {
 		this.password = password;
 		this.userType = userType;
 		this.avatar = avatar;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+
+	public String getDeletionStatus() {
+		return deletionStatus;
+	}
+
+	public void setDeletionStatus(String deletionStatus) {
+		this.deletionStatus = deletionStatus;
 	}
 
 	public Long getUserId() {
