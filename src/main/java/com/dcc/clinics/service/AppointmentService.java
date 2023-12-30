@@ -133,7 +133,8 @@ public class AppointmentService {
 
             // Check for null before subtracting 1
             if (availableSlots != null) {
-                appointment.setSlots(availableSlots - 1);
+                availableSlots -= 1;
+                appointment.setSlots(availableSlots);
             }
         } else {
             for (Appointment toUpdateAppointment : sameScheduleAppointments) {
@@ -145,7 +146,8 @@ public class AppointmentService {
                         if(availableSlots == 0) {
                             return "Appointment failed to save. No more slots available";
                         }
-                        toUpdateAppointment.setSlots(availableSlots-=1);
+                        availableSlots-=1;
+                        toUpdateAppointment.setSlots(availableSlots);
                     } // cancelled do not reduce slots - cancelled upon creation is unrealistic but caught it just in case
                     appointment.setSlots(availableSlots);
                     appointmentRepository.save(toUpdateAppointment);
@@ -342,10 +344,12 @@ public class AppointmentService {
                             if(availableSlots == 0) {
                                 return "Appointment failed to save. No more slots available";
                             }
-                            toUpdateAppointment.setSlots(availableSlots-=1);
+                            availableSlots-=1;
+                            toUpdateAppointment.setSlots(availableSlots);
                         } else if (oldStatus.compareTo("Cancelled") != 0 && newStatus.compareTo("Cancelled") == 0) {
                             // getting cancelled, increase slots
-                            toUpdateAppointment.setSlots(availableSlots+=1);
+                            availableSlots+=1;
+                            toUpdateAppointment.setSlots(availableSlots);
                         }
                         appointmentRepository.save(toUpdateAppointment);
                     }
@@ -425,7 +429,8 @@ public class AppointmentService {
                     Integer availableSlots = toUpdateAppointment.getSlots();
                     if(appointment.getStatus().compareTo("Cancelled") != 0){
                         // not cancelled, increase slots
-                        toUpdateAppointment.setSlots(availableSlots+1);
+                        availableSlots+=1;
+                        toUpdateAppointment.setSlots(availableSlots);
                     } // if cancelled, slot adjustment already performed, no slot changes
                     appointmentRepository.save(toUpdateAppointment);
                 }
