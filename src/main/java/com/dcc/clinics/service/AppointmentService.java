@@ -145,9 +145,9 @@ public class AppointmentService {
                         if(availableSlots == 0) {
                             return "Appointment failed to save. No more slots available";
                         }
-                        toUpdateAppointment.setSlots(availableSlots-1);
+                        toUpdateAppointment.setSlots(availableSlots-=1);
                     } // cancelled do not reduce slots - cancelled upon creation is unrealistic but caught it just in case
-                    appointment.setSlots(toUpdateAppointment.getSlots());
+                    appointment.setSlots(availableSlots);
                     appointmentRepository.save(toUpdateAppointment);
                 }
             }
@@ -342,10 +342,10 @@ public class AppointmentService {
                             if(availableSlots == 0) {
                                 return "Appointment failed to save. No more slots available";
                             }
-                            toUpdateAppointment.setSlots(availableSlots-1);
+                            toUpdateAppointment.setSlots(availableSlots-=1);
                         } else if (oldStatus.compareTo("Cancelled") != 0 && newStatus.compareTo("Cancelled") == 0) {
                             // getting cancelled, increase slots
-                            toUpdateAppointment.setSlots(availableSlots+1);
+                            toUpdateAppointment.setSlots(availableSlots+=1);
                         }
                         appointmentRepository.save(toUpdateAppointment);
                     }
