@@ -459,7 +459,7 @@ public class AppointmentService {
             }
 
             // handled already at updateAppointment.
-            if(newStatus.compareTo("Rescheduled") == 0) {
+            if(newStatus.compareTo("Rescheduled") != 0) {
                 try {
                     final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
                     Calendar calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
