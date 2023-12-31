@@ -137,9 +137,15 @@ public class AppointmentService {
                 appointment.setSlots(availableSlots);
             }
         } else {
+            Integer availableSlots = schedule.getSlots();
+            // Check for null before subtracting 1
+            if (availableSlots != null) {
+                availableSlots -= 1;
+                appointment.setSlots(availableSlots);
+            }
             for (Appointment toUpdateAppointment : sameScheduleAppointments) {
                 if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
-                    Integer availableSlots = toUpdateAppointment.getSlots();
+                    availableSlots = toUpdateAppointment.getSlots();
                     if(status.compareTo("Cancelled") != 0){
                         // not cancelled, reduce slots
 
