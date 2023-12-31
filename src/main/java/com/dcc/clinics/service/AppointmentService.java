@@ -267,10 +267,11 @@ public class AppointmentService {
                         toUpdateAppointment.setSlots(availableSlots);
                         appointmentRepository.save(toUpdateAppointment);
                     }
+                    if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
+                        Integer availableSlots = toUpdateAppointment.getSlots();
+                        appointment.setSlots(availableSlots);
+                    }
                 }
-                Integer availableSlots = appointment.getSlots();
-                availableSlots-=1;
-                appointment.setSlots(availableSlots);
 
                 appointment.setScheduleDate(scheduleDate);
                 appointmentRepository.save(appointment);
