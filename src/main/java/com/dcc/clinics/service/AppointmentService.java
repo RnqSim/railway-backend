@@ -321,9 +321,9 @@ public class AppointmentService {
                 String oldDescription;
 
                 LocalDate localDate = scheduleDate.toLocalDate();
-                LocalTime startLocalTime = schedule.getStartTime().toLocalTime().minusHours(8);
+                LocalTime startLocalTime = schedule.getStartTime().toLocalTime();
                 LocalDateTime startLocalDateTime = LocalDateTime.of(localDate, startLocalTime);
-                LocalTime endLocalTime = schedule.getEndTime().toLocalTime().minusHours(8);
+                LocalTime endLocalTime = schedule.getEndTime().toLocalTime();
                 LocalDateTime endLocalDateTime = LocalDateTime.of(localDate, endLocalTime);
 
                 DateTime startDateTime = new DateTime(startLocalDateTime.toString()+":00");
