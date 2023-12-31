@@ -230,7 +230,7 @@ public class AppointmentService {
         return "Appointment saved to database";
     }
 
-    public String updateAppointment(Long appointmentId,  Date scheduleDate) {
+    public String updateAppointment(Long appointmentId, Date scheduleDate) {
         Optional<Appointment> existingAppointment = appointmentRepository.findById(appointmentId);
 
         if (existingAppointment.isPresent()) {
@@ -261,7 +261,7 @@ public class AppointmentService {
                 Long scheduleId = appointment.getScheduleId();
                 List<Appointment> sameScheduleAppointments = appointmentRepository.findAllByScheduleId(scheduleId);
                 for (Appointment toUpdateAppointment : sameScheduleAppointments) {
-                    if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
+                    if(toUpdateAppointment.getScheduleDate().compareTo(oldScheduleDate) == 0) {
                         Integer availableSlots = toUpdateAppointment.getSlots();
                         availableSlots+=1;
                         toUpdateAppointment.setSlots(availableSlots);
