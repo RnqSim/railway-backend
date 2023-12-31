@@ -315,6 +315,8 @@ public class AppointmentService {
                         .setApplicationName(APPLICATION_NAME)
                         .build();
 
+                System.out.print("Checkpoint A ================================================================ \n");
+
                 String newDescription;
                 String oldDescription;
 
@@ -355,11 +357,14 @@ public class AppointmentService {
                     newDescription = "Unknown status";
                 }
 
+                System.out.print("Checkpoint B ================================================================ \n");
+
                 System.out.println("Old: " + oldDescription);
                 System.out.println("New: " + newDescription);
 
                 String pageToken = null;
                 do {
+                    System.out.print("Checkpoint C ================================================================ \n");
                     Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
                     List<Event> items = events.getItems();
                     for (Event event : items) {
@@ -379,7 +384,7 @@ public class AppointmentService {
                 e.printStackTrace();
                 return "Failed to Update Google Calendar";
             }
-            System.out.print("Update ================================================================");
+            System.out.print("Update ================================================================ \n");
 
             appointmentRepository.save(appointment);
             Long patientId = appointment.getPatientUserId();
