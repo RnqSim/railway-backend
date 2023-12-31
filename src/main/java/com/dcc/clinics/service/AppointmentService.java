@@ -308,18 +308,27 @@ public class AppointmentService {
                         oldDescription = "Unknown status";
                     }
 
+
+
                     String pageToken = null;
                     do {
                         System.out.print("Checkpoint C ================================================================ \n");
                         Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
                         List<Event> items = events.getItems();
+                        String databaseStart = endDateTime.toString();
+                        String databaseEnd = endDateTime.toString();
+
+                        databaseStart = databaseStart.replace("Z","+08:00");
+                        databaseEnd = databaseEnd.replace("Z","+08:00");
+
                         for (Event event : items) {
                             System.out.println(event.getSummary());
-                            System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
-                            System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
+                            System.out.println("  " + databaseStart + " compared to " + event.getEnd().getDateTime().toString());
+                            System.out.println("  " + databaseEnd + " compared to " + event.getStart().getDateTime().toString());
+
                             if (event.getDescription().compareTo(oldDescription) == 0 &&
-                                    event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
-                                    event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
+                                    event.getEnd().getDateTime().toString().compareTo(databaseEnd) == 0 &&
+                                    event.getStart().getDateTime().toString().compareTo(databaseStart) == 0) {
                                 System.out.println("Event Found ================================================================");
                                 event.setDescription("Rescheduled");
                                 Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
@@ -521,13 +530,21 @@ public class AppointmentService {
                         System.out.print("Checkpoint C ================================================================ \n");
                         Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
                         List<Event> items = events.getItems();
+
+                        String databaseStart = endDateTime.toString();
+                        String databaseEnd = endDateTime.toString();
+
+                        databaseStart = databaseStart.replace("Z","+08:00");
+                        databaseEnd = databaseEnd.replace("Z","+08:00");
+
                         for (Event event : items) {
                             System.out.println(event.getSummary());
-                            System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
-                            System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
+                            System.out.println("  " + databaseStart + " compared to " + event.getEnd().getDateTime().toString());
+                            System.out.println("  " + databaseEnd + " compared to " + event.getStart().getDateTime().toString());
+
                             if (event.getDescription().compareTo(oldDescription) == 0 &&
-                                    event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
-                                    event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
+                                    event.getEnd().getDateTime().toString().compareTo(databaseEnd) == 0 &&
+                                    event.getStart().getDateTime().toString().compareTo(databaseStart) == 0) {
                                 System.out.println("Event Found ================================================================");
                                 event.setDescription(newDescription);
                                 Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
