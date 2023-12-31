@@ -297,7 +297,7 @@ public class AppointmentService {
             appointment.setStatus(newStatus);
             Date scheduleDate = appointment.getScheduleDate();
 
-            if(newStatus == "Completed") {
+            if(newStatus.compareTo("Completed") == 0) {
                 LocalDateTime currentDateTime = LocalDateTime.now();
 
                 // Calculate the time difference between scheduleDate and currentDateTime
