@@ -267,6 +267,8 @@ public class AppointmentService {
                         toUpdateAppointment.setSlots(availableSlots);
                         appointmentRepository.save(toUpdateAppointment);
                     }
+                }
+                for (Appointment toUpdateAppointment : sameScheduleAppointments) {
                     if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
                         Integer availableSlots = toUpdateAppointment.getSlots();
                         appointment.setSlots(availableSlots);
