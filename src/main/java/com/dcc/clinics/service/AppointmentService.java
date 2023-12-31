@@ -296,9 +296,15 @@ public class AppointmentService {
             Schedule schedule = scheduleRepository.findByScheduleId(scheduleId);
 
             List<Appointment> sameScheduleAppointments = appointmentRepository.findAllByScheduleId(scheduleId);
+            Integer availableSlots = schedule.getSlots();
+            // Check for null before subtracting 1
+            if (availableSlots != null) {
+                availableSlots -= 1;
+                appointment.setSlots(availableSlots);
+            }
             for (Appointment toUpdateAppointment : sameScheduleAppointments) {
                 if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
-                    Integer availableSlots = toUpdateAppointment.getSlots();
+                    availableSlots = toUpdateAppointment.getSlots();
                     if(oldStatus.compareTo("Cancelled") == 0 && newStatus.compareTo("Cancelled") != 0){
                         // getting uncancelled, reduce slots
                         if(availableSlots == 0) {
