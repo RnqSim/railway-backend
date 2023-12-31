@@ -362,6 +362,9 @@ public class AppointmentService {
                 System.out.println("Old: " + oldDescription);
                 System.out.println("New: " + newDescription);
 
+                System.out.println("  " + endDateTime.toString());
+                System.out.println("  " + startDateTime.toString());
+
                 String pageToken = null;
                 do {
                     System.out.print("Checkpoint C ================================================================ \n");
@@ -369,6 +372,8 @@ public class AppointmentService {
                     List<Event> items = events.getItems();
                     for (Event event : items) {
                         System.out.println(event.getSummary());
+                        System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
+                        System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
                         if (event.getDescription().compareTo(oldDescription) == 0 &&
                                 event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
                                 event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
