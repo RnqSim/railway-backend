@@ -531,7 +531,7 @@ public class AppointmentService {
                         Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
                         List<Event> items = events.getItems();
 
-                        String databaseStart = endDateTime.toString();
+                        String databaseStart = startDateTime.toString();
                         String databaseEnd = endDateTime.toString();
 
                         databaseStart = databaseStart.replace("Z","+08:00");
