@@ -322,7 +322,7 @@ public class AppointmentService {
                                     event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
                                 System.out.println("Event Found ================================================================");
                                 event.setDescription("Rescheduled");
-                                //Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
+                                Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
                                 break;
                             }
                         }
@@ -530,7 +530,7 @@ public class AppointmentService {
                                     event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
                                 System.out.println("Event Found ================================================================");
                                 event.setDescription(newDescription);
-                                //Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
+                                Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
                                 break;
                             }
                         }
