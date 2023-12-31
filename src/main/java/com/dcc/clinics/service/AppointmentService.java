@@ -275,6 +275,124 @@ public class AppointmentService {
                     }
                 }
 
+                //update old google Calendar Event
+                try {
+                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                    Calendar calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                            .setApplicationName(APPLICATION_NAME)
+                            .build();
+
+                    String oldDescription;
+                    String oldStatus = appointment.getStatus();
+
+                    LocalDate localDate = oldScheduleDate.toLocalDate();
+                    LocalTime startLocalTime = schedule.getStartTime().toLocalTime();
+                    LocalDateTime startLocalDateTime = LocalDateTime.of(localDate, startLocalTime);
+                    LocalTime endLocalTime = schedule.getEndTime().toLocalTime();
+                    LocalDateTime endLocalDateTime = LocalDateTime.of(localDate, endLocalTime);
+
+                    DateTime startDateTime = new DateTime(startLocalDateTime.toString()+":00");
+                    DateTime endDateTime = new DateTime(endLocalDateTime.toString()+":00");
+
+                    if(oldStatus.compareTo("Scheduled by Patient")==0) {
+                        oldDescription = "Status: Waiting for Doctor Confirmation";
+                    } else if (oldStatus.compareTo("Confirmed by Doctor")==0) {
+                        oldDescription = "Status: Confirmed";
+                    } else if (oldStatus.compareTo("Cancelled")==0) {
+                        oldDescription = "Status: Cancelled";
+                    } else if (oldStatus.compareTo("Rescheduled")==0) {
+                        oldDescription = "Rescheduled";
+                    } else if (oldStatus.compareTo("Completed")==0) {
+                        oldDescription = "Completed";
+                    } else {
+                        oldDescription = "Unknown status";
+                    }
+
+                    String pageToken = null;
+                    do {
+                        System.out.print("Checkpoint C ================================================================ \n");
+                        Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
+                        List<Event> items = events.getItems();
+                        for (Event event : items) {
+                            System.out.println(event.getSummary());
+                            System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
+                            System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
+                            if (event.getDescription().compareTo(oldDescription) == 0 &&
+                                    event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
+                                    event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
+                                System.out.println("Event Found ================================================================");
+                                event.setDescription("Rescheduled");
+                                //Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
+                                break;
+                            }
+                        }
+                        pageToken = events.getNextPageToken();
+                    } while (pageToken != null);
+
+                    Long patientId = appointment.getPatientUserId();
+                    Clinic clinic = clinicRepository.findByClinicId(schedule.getClinicId());
+                    User doctor = userRepository.findByUserId(schedule.getDoctorUserId());
+                    User patient = userRepository.findByUserId(patientId);
+
+                    localDate = scheduleDate.toLocalDate();
+                    startLocalTime = schedule.getStartTime().toLocalTime().minusHours(8);
+                    startLocalDateTime = LocalDateTime.of(localDate, startLocalTime);
+                    endLocalTime = schedule.getEndTime().toLocalTime().minusHours(8);
+                    endLocalDateTime = LocalDateTime.of(localDate, endLocalTime);
+
+                    Event event = new Event()
+                            .setSummary("Appointment at " + clinic.getName())
+                            .setLocation(clinic.getAddress());
+
+                    if(oldStatus.compareTo("Scheduled by Patient")==0) {
+                        event.setDescription("Status: Waiting for Doctor Confirmation");
+                    } else if (oldStatus.compareTo("Confirmed by Doctor")==0) {
+                        event.setDescription("Status: Confirmed");
+                    } else if (oldStatus.compareTo("Cancelled")==0) {
+                        event.setDescription("Status: Cancelled");
+                    } else if (oldStatus.compareTo("Rescheduled")==0) {
+                        event.setDescription("Rescheduled");
+                    } else {
+                        event.setDescription("Unknown status");
+                    }
+
+                    startDateTime = new DateTime(startLocalDateTime.toString()+":00");
+                    EventDateTime start = new EventDateTime();
+                    start.setDateTime(startDateTime);
+
+                    endDateTime = new DateTime(endLocalDateTime.toString()+":00");
+                    EventDateTime end = new EventDateTime();
+                    end.setDateTime(endDateTime);
+
+                    event.setStart(start);
+                    event.setEnd(end);
+
+                    EventAttendee[] attendees = new EventAttendee[] {
+                            new EventAttendee().setEmail(doctor.getEmail()),
+                            new EventAttendee().setEmail(patient.getEmail()),
+                    };
+                    event.setAttendees(Arrays.asList(attendees));
+
+                    EventReminder[] reminderOverrides = new EventReminder[] {
+                            new EventReminder().setMethod("email").setMinutes(24 * 60),
+                            new EventReminder().setMethod("popup").setMinutes(10),
+                    };
+                    Event.Reminders reminders = new Event.Reminders()
+                            .setUseDefault(false)
+                            .setOverrides(Arrays.asList(reminderOverrides));
+                    event.setReminders(reminders);
+
+                    String calendarId = "primary";
+                    event = calendarService.events().insert(calendarId, event)
+                            .setSendNotifications(true)
+                            .execute();
+                    System.out.printf("Event created: %s\n", event.getHtmlLink());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return "Failed to Update Google Calendar";
+                }
+
                 appointment.setScheduleDate(scheduleDate);
                 appointmentRepository.save(appointment);
                 updateAppointmentStatus(appointment.getTransactionNo(), "Rescheduled");
