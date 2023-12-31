@@ -305,6 +305,7 @@ public class AppointmentService {
                 long hoursDifference = TimeUnit.MILLISECONDS.toHours(timeDifference);
 
                 // appointment time - current time (if current time is after, result should be negative or 0)
+                System.out.println(hoursDifference);
                 if (hoursDifference > 0) {
                     return "Cannot complete appointment before provided appointment time";
                 }
