@@ -257,6 +257,18 @@ public class AppointmentService {
             long hoursDifference = Math.abs(TimeUnit.MILLISECONDS.toHours(timeDifference));
 
             if (hoursDifference >= 24) {
+
+                Long scheduleId = appointment.getScheduleId();
+                List<Appointment> sameScheduleAppointments = appointmentRepository.findAllByScheduleId(scheduleId);
+                for (Appointment toUpdateAppointment : sameScheduleAppointments) {
+                    if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
+                        Integer availableSlots = toUpdateAppointment.getSlots();
+                        availableSlots+=1;
+                        toUpdateAppointment.setSlots(availableSlots);
+                        appointmentRepository.save(toUpdateAppointment);
+                    }
+                }
+
                 appointment.setScheduleDate(scheduleDate);
                 appointmentRepository.save(appointment);
                 updateAppointmentStatus(appointment.getTransactionNo(), "Rescheduled");
@@ -309,6 +321,12 @@ public class AppointmentService {
                     } else if (oldStatus.compareTo("Cancelled") != 0 && newStatus.compareTo("Cancelled") == 0) {
                         // getting cancelled, increase slots
                         availableSlots+=1;
+                        toUpdateAppointment.setSlots(availableSlots);
+                    } else if (newStatus.compareTo("Rescheduled") == 0) {
+                        if(availableSlots == 0) {
+                            return "Appointment failed to save. No more slots available";
+                        }
+                        availableSlots-=1;
                         toUpdateAppointment.setSlots(availableSlots);
                     }
                     appointmentRepository.save(toUpdateAppointment);
