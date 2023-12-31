@@ -458,85 +458,88 @@ public class AppointmentService {
                 }
             }
 
-            try {
-                final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-                Calendar calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                        .setApplicationName(APPLICATION_NAME)
-                        .build();
+            // handled already at updateAppointment.
+            if(newStatus.compareTo("Rescheduled") == 0) {
+                try {
+                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                    Calendar calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                            .setApplicationName(APPLICATION_NAME)
+                            .build();
 
-                System.out.print("Checkpoint A ================================================================ \n");
+                    System.out.print("Checkpoint A ================================================================ \n");
 
-                String newDescription;
-                String oldDescription;
+                    String newDescription;
+                    String oldDescription;
 
-                LocalDate localDate = scheduleDate.toLocalDate();
-                LocalTime startLocalTime = schedule.getStartTime().toLocalTime();
-                LocalDateTime startLocalDateTime = LocalDateTime.of(localDate, startLocalTime);
-                LocalTime endLocalTime = schedule.getEndTime().toLocalTime();
-                LocalDateTime endLocalDateTime = LocalDateTime.of(localDate, endLocalTime);
+                    LocalDate localDate = scheduleDate.toLocalDate();
+                    LocalTime startLocalTime = schedule.getStartTime().toLocalTime();
+                    LocalDateTime startLocalDateTime = LocalDateTime.of(localDate, startLocalTime);
+                    LocalTime endLocalTime = schedule.getEndTime().toLocalTime();
+                    LocalDateTime endLocalDateTime = LocalDateTime.of(localDate, endLocalTime);
 
-                DateTime startDateTime = new DateTime(startLocalDateTime.toString()+":00");
-                DateTime endDateTime = new DateTime(endLocalDateTime.toString()+":00");
+                    DateTime startDateTime = new DateTime(startLocalDateTime.toString()+":00");
+                    DateTime endDateTime = new DateTime(endLocalDateTime.toString()+":00");
 
-                if(oldStatus.compareTo("Scheduled by Patient")==0) {
-                    oldDescription = "Status: Waiting for Doctor Confirmation";
-                } else if (oldStatus.compareTo("Confirmed by Doctor")==0) {
-                    oldDescription = "Status: Confirmed";
-                } else if (oldStatus.compareTo("Cancelled")==0) {
-                    oldDescription = "Status: Cancelled";
-                } else if (oldStatus.compareTo("Rescheduled")==0) {
-                    oldDescription = "Rescheduled";
-                } else if (oldStatus.compareTo("Completed")==0) {
-                    oldDescription = "Completed";
-                } else {
-                    oldDescription = "Unknown status";
-                }
-
-                if(newStatus.compareTo("Scheduled by Patient")==0) {
-                    newDescription = "Status: Waiting for Doctor Confirmation";
-                } else if (newStatus.compareTo("Confirmed by Doctor")==0) {
-                    newDescription = "Status: Confirmed";
-                } else if (newStatus.compareTo("Cancelled")==0) {
-                    newDescription = "Status: Cancelled";
-                } else if (newStatus.compareTo("Rescheduled")==0) {
-                    newDescription = "Rescheduled";
-                } else if (newStatus.compareTo("Completed")==0) {
-                    newDescription = "Completed";
-                } else {
-                    newDescription = "Unknown status";
-                }
-
-                System.out.print("Checkpoint B ================================================================ \n");
-
-                System.out.println("Old: " + oldDescription);
-                System.out.println("New: " + newDescription);
-
-                System.out.println("  " + endDateTime.toString());
-                System.out.println("  " + startDateTime.toString());
-
-                String pageToken = null;
-                do {
-                    System.out.print("Checkpoint C ================================================================ \n");
-                    Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
-                    List<Event> items = events.getItems();
-                    for (Event event : items) {
-                        System.out.println(event.getSummary());
-                        System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
-                        System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
-                        if (event.getDescription().compareTo(oldDescription) == 0 &&
-                                event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
-                                event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
-                            System.out.println("Event Found ================================================================");
-                            event.setDescription(newDescription);
-                            //Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
-                            break;
-                        }
+                    if(oldStatus.compareTo("Scheduled by Patient")==0) {
+                        oldDescription = "Status: Waiting for Doctor Confirmation";
+                    } else if (oldStatus.compareTo("Confirmed by Doctor")==0) {
+                        oldDescription = "Status: Confirmed";
+                    } else if (oldStatus.compareTo("Cancelled")==0) {
+                        oldDescription = "Status: Cancelled";
+                    } else if (oldStatus.compareTo("Rescheduled")==0) {
+                        oldDescription = "Rescheduled";
+                    } else if (oldStatus.compareTo("Completed")==0) {
+                        oldDescription = "Completed";
+                    } else {
+                        oldDescription = "Unknown status";
                     }
-                    pageToken = events.getNextPageToken();
-                } while (pageToken != null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return "Failed to Update Google Calendar";
+
+                    if(newStatus.compareTo("Scheduled by Patient")==0) {
+                        newDescription = "Status: Waiting for Doctor Confirmation";
+                    } else if (newStatus.compareTo("Confirmed by Doctor")==0) {
+                        newDescription = "Status: Confirmed";
+                    } else if (newStatus.compareTo("Cancelled")==0) {
+                        newDescription = "Status: Cancelled";
+                    } else if (newStatus.compareTo("Rescheduled")==0) {
+                        newDescription = "Rescheduled";
+                    } else if (newStatus.compareTo("Completed")==0) {
+                        newDescription = "Completed";
+                    } else {
+                        newDescription = "Unknown status";
+                    }
+
+                    System.out.print("Checkpoint B ================================================================ \n");
+
+                    System.out.println("Old: " + oldDescription);
+                    System.out.println("New: " + newDescription);
+
+                    System.out.println("  " + endDateTime.toString());
+                    System.out.println("  " + startDateTime.toString());
+
+                    String pageToken = null;
+                    do {
+                        System.out.print("Checkpoint C ================================================================ \n");
+                        Events events = calendarService.events().list("primary").setPageToken(pageToken).execute();
+                        List<Event> items = events.getItems();
+                        for (Event event : items) {
+                            System.out.println(event.getSummary());
+                            System.out.println("  " + endDateTime.toString() + " compared to " + event.getEnd().getDateTime().toString());
+                            System.out.println("  " + startDateTime.toString() + " compared to " + event.getStart().getDateTime().toString());
+                            if (event.getDescription().compareTo(oldDescription) == 0 &&
+                                    event.getEnd().getDateTime().toString().compareTo(endDateTime.toString()) == 0 &&
+                                    event.getStart().getDateTime().toString().compareTo(startDateTime.toString()) == 0) {
+                                System.out.println("Event Found ================================================================");
+                                event.setDescription(newDescription);
+                                //Event updatedEvent = calendarService.events().update("primary", event.getId(), event).execute();
+                                break;
+                            }
+                        }
+                        pageToken = events.getNextPageToken();
+                    } while (pageToken != null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return "Failed to Update Google Calendar";
+                }
             }
             System.out.print("Update ================================================================ \n");
 
