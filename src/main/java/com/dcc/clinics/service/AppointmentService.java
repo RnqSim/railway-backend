@@ -286,6 +286,29 @@ public class AppointmentService {
                 }
             }
 
+            Long scheduleId = appointment.getScheduleId();
+            Schedule schedule = scheduleRepository.findByScheduleId(scheduleId);
+
+            List<Appointment> sameScheduleAppointments = appointmentRepository.findAllByScheduleId(scheduleId);
+            for (Appointment toUpdateAppointment : sameScheduleAppointments) {
+                if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
+                    Integer availableSlots = toUpdateAppointment.getSlots();
+                    if(oldStatus.compareTo("Cancelled") == 0 && newStatus.compareTo("Cancelled") != 0){
+                        // getting uncancelled, reduce slots
+                        if(availableSlots == 0) {
+                            return "Appointment failed to save. No more slots available";
+                        }
+                        availableSlots-=1;
+                        toUpdateAppointment.setSlots(availableSlots);
+                    } else if (oldStatus.compareTo("Cancelled") != 0 && newStatus.compareTo("Cancelled") == 0) {
+                        // getting cancelled, increase slots
+                        availableSlots+=1;
+                        toUpdateAppointment.setSlots(availableSlots);
+                    }
+                    appointmentRepository.save(toUpdateAppointment);
+                }
+            }
+
             try {
                 final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
                 Calendar calendarService = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -294,9 +317,6 @@ public class AppointmentService {
 
                 String newDescription;
                 String oldDescription;
-
-                Long scheduleId = appointment.getScheduleId();
-                Schedule schedule = scheduleRepository.findByScheduleId(scheduleId);
 
                 LocalDate localDate = scheduleDate.toLocalDate();
                 LocalTime startLocalTime = schedule.getStartTime().toLocalTime().minusHours(8);
@@ -333,26 +353,6 @@ public class AppointmentService {
                     newDescription = "Completed";
                 } else {
                     newDescription = "Unknown status";
-                }
-
-                List<Appointment> sameScheduleAppointments = appointmentRepository.findAllByScheduleId(scheduleId);
-                for (Appointment toUpdateAppointment : sameScheduleAppointments) {
-                    if(toUpdateAppointment.getScheduleDate().compareTo(scheduleDate) == 0) {
-                        Integer availableSlots = toUpdateAppointment.getSlots();
-                        if(oldStatus.compareTo("Cancelled") == 0 && newStatus.compareTo("Cancelled") != 0){
-                            // getting uncancelled, reduce slots
-                            if(availableSlots == 0) {
-                                return "Appointment failed to save. No more slots available";
-                            }
-                            availableSlots-=1;
-                            toUpdateAppointment.setSlots(availableSlots);
-                        } else if (oldStatus.compareTo("Cancelled") != 0 && newStatus.compareTo("Cancelled") == 0) {
-                            // getting cancelled, increase slots
-                            availableSlots+=1;
-                            toUpdateAppointment.setSlots(availableSlots);
-                        }
-                        appointmentRepository.save(toUpdateAppointment);
-                    }
                 }
 
                 System.out.println("Old: " + oldDescription);
@@ -431,8 +431,8 @@ public class AppointmentService {
                         // not cancelled, increase slots
                         availableSlots+=1;
                         toUpdateAppointment.setSlots(availableSlots);
+                        appointmentRepository.save(toUpdateAppointment);
                     } // if cancelled, slot adjustment already performed, no slot changes
-                    appointmentRepository.save(toUpdateAppointment);
                 }
             }
             appointmentRepository.deleteById(appointmentId);
