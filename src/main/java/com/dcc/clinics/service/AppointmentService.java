@@ -268,6 +268,9 @@ public class AppointmentService {
                         appointmentRepository.save(toUpdateAppointment);
                     }
                 }
+                Integer availableSlots = appointment.getSlots();
+                availableSlots-=1;
+                appointment.setSlots(availableSlots);
 
                 appointment.setScheduleDate(scheduleDate);
                 appointmentRepository.save(appointment);
