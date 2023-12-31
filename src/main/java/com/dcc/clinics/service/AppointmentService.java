@@ -252,8 +252,8 @@ public class AppointmentService {
 
             if (hoursDifference >= 24) {
                 appointment.setScheduleDate(scheduleDate);
-                updateAppointmentStatus(appointment.getTransactionNo(), "Rescheduled");
                 appointmentRepository.save(appointment);
+                updateAppointmentStatus(appointment.getTransactionNo(), "Rescheduled");
                 return "Appointment updated successfully";
             } else {
                 return "Cannot update appointment within 24 hours of the scheduled time.";
